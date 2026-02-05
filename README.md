@@ -3,6 +3,7 @@
 Este é um projeto de demonstração de uma plataforma de apostas simples, desenvolvido com Node.js, Express e SQLite.
 
 **⚠️ PROJETO PARA FINS EDUCACIONAIS E DE PORTFÓLIO. NÃO USE EM PRODUÇÃO SEM AUDITORIA.**
+My Portfólio: pedrovasques.com
 
 ## Funcionalidades
 
