@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= brandName %> — Cadastro</title>
+    <link rel="stylesheet" href="/style.css" />
+    <% if (recaptchaSiteKey) { %>
+      <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <% } %>
+    <script defer src="/app.js"></script>
+  </head>
+  <body>
+    <div class="auth-shell">
+      <div class="auth-modal">
+        <h1><%= brandName %> — Criar conta</h1>
+      <% if (error) { %>
+        <div class="alert"><%= error %></div>
+      <% } %>
+      <form action="/register" method="post" class="form">
+        <label>E-mail</label>
+        <input type="email" name="email" placeholder="seuemail@dominio.com" />
+        <label>Nome</label>
+        <input type="text" name="firstName" required />
+
+        <label>Sobrenome</label>
+        <input type="text" name="lastName" required />
+
+        <label>CPF</label>
+        <input type="text" name="cpf" placeholder="000.000.000-00" required />
+
+        <label>Data de Nascimento</label>
+        <input type="date" name="dob" id="dob" max="<%= maxDate %>" required />
+        <small id="dobMsg"></small>
+        
+        <label>Senha</label>
+        <input type="password" name="password" required />
+        <small>A senha precisa ter no mínimo 8 caracteres, incluir pelo menos 1 letra maiúscula, 1 letra minúscula, 1 número e 1 caractere especial.</small>
+
+        <div class="terms-row">
+          <input type="checkbox" id="accept" name="accept" required />
+          <label for="accept">Eu aceito os <a href="#" id="openTerms">Termos de Uso</a> e a <a href="#" id="openPrivacy">Política de Privacidade</a>.</label>
+        </div>
+
+        <% if (recaptchaSiteKey) { %>
+          <div class="g-recaptcha" data-sitekey="<%= recaptchaSiteKey %>"></div>
+        <% } %>
+
+        <button type="submit">Cadastrar</button>
+      </form>
+      <p>
+        Já possui conta?
+        <a href="/login">Entrar</a>
+      </p>
+      </div>
+    </div>
+
+    <!-- Modal Termos de Uso -->
+    <div class="modal" id="termsModal" aria-hidden="true">
+      <div class="modal-backdrop" id="closeTerms"></div>
+      <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="termsTitle">
+        <header class="modal-header">
+          <h2 id="termsTitle">Termos de Uso</h2>
+          <button class="icon-btn" id="closeTermsBtn" aria-label="Fechar">✕</button>
+        </header>
+        <div class="modal-body">
+          <div class="content-card">
+            <p>Conteúdo dos Termos de Uso. Substituir por versão oficial digitalizada.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Política de Privacidade -->
+    <div class="modal" id="privacyModal" aria-hidden="true">
+      <div class="modal-backdrop" id="closePrivacy"></div>
+      <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="privacyTitle">
+        <header class="modal-header">
+          <h2 id="privacyTitle">Política de Privacidade</h2>
+          <button class="icon-btn" id="closePrivacyBtn" aria-label="Fechar">✕</button>
+        </header>
+        <div class="modal-body">
+          <div class="content-card">
+            <p>Conteúdo da Política de Privacidade. Substituir por versão oficial digitalizada.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+  </html>

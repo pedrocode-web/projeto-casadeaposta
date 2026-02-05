@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= brandName %> — Crash</title>
+    <link rel="stylesheet" href="/style.css" />
+    <script defer src="/crash.js"></script>
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="nav-left"><a href="/inicio" class="brand" style="text-decoration:none;">← <%= brandName %></a></div>
+      <div class="nav-right">
+        <div class="user">
+          <button class="user-toggle" id="userMenuToggle">
+            <span id="balanceDisplay" style="margin-right:10px; opacity:.9; font-weight:600;">Saldo: R$ <%= ((user.balance_cents||0)/100).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
+            <span><%= user.first_name %> <%= user.last_name %></span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 10l5 5 5-5z"/></svg>
+          </button>
+          <div class="user-dropdown" id="userDropdown">
+            <a href="#" id="openSettings">Configurações</a>
+            <% if (typeof showAdmin !== 'undefined' && showAdmin) { %>
+              <a href="/admin">Administração</a>
+            <% } %>
+            <a href="/logout">Sair</a>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <main class="main">
+      <% if (error) { %><div class="alert"><%= error %></div><% } %>
+      <% if (msg) { %><div class="alert" style="background:#153b1a;border-color:#3e7a47;"><%= msg %></div><% } %>
+
+      <section class="game-shell">
+        <header class="game-header">
+          <h1>Crash</h1>
+          <p class="muted">Faça cashout antes do crash para lucrar.</p>
+        </header>
+        <div class="canvas-wrapper">
+          <canvas id="crashCanvas" width="960" height="420" aria-label="Gráfico do Crash"></canvas>
+          <div class="hud">
+            <div class="multiplier" id="crashHudMultiplier">1.00x</div>
+            <div class="status" id="crashHudStatus"></div>
+          </div>
+        </div>
+        <div class="game-controls">
+          <form id="crashStartForm" class="form game-form" method="post" action="/games/crash/start">
+            <label>Valor da aposta</label>
+            <input type="text" name="amount" id="crashAmount" placeholder="Ex: 10,00" required />
+            <button type="submit" class="primary">Iniciar</button>
+          </form>
+          <div class="actions">
+            <button id="crashCashoutBtn" class="primary" disabled>Cashout</button>
+            <button id="crashResetBtn">Novo jogo</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </body>
+  </html>

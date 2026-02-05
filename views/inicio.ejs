@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= brandName %> — Início</title>
+    <link rel="stylesheet" href="/style.css" />
+    <script defer src="/app.js"></script>
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="nav-left" style="display:flex; align-items:center; gap:10px;">
+        <button class="icon-btn" id="sidebarToggle" aria-label="Abrir menu" title="Menu" style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg>
+        </button>
+        <span class="brand"><%= brandName %></span>
+      </div>
+      <div class="nav-right">
+        <button class="primary" id="openDepositModal" style="margin-right:12px;">Depositar Saldo</button>
+        <div class="user">
+          <button class="user-toggle" id="userMenuToggle">
+            <span id="balanceDisplay" style="margin-right:10px; opacity:.9; font-weight:600;">Saldo: R$ <%= ((user.balance_cents||0)/100).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
+            <span><%= user.first_name %> <%= user.last_name %></span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 10l5 5 5-5z"/></svg>
+          </button>
+          <div class="user-dropdown" id="userDropdown">
+            <a href="#" id="openSettings">Configurações</a>
+            <% if (typeof showAdmin !== 'undefined' && showAdmin) { %>
+              <a href="/admin">Administração</a>
+            <% } %>
+            <a href="/logout">Sair</a>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <div class="layout">
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+          <span class="brand" style="font-size:1rem;">Menu</span>
+          <button class="icon-btn" id="sidebarClose" aria-label="Fechar menu">✕</button>
+        </div>
+        <nav class="sidebar-nav">
+          <a class="sidebar-item active" href="/inicio">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3l9 8h-3v9H6v-9H3z"/></svg>
+            <span>Início</span>
+          </a>
+          <a class="sidebar-item" href="/games/crash">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 20h16v-2H4v2zm0-8h10v-2H4v2zm0-6h16V4H4v2z"/></svg>
+            <span>Crash</span>
+          </a>
+          <a class="sidebar-item" href="#" id="openMinesModal">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="12" r="10"/></svg>
+            <span>Campo Minado</span>
+          </a>
+          <a class="sidebar-item" href="#" id="openSlotsModal">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 5h10v14H7z"/></svg>
+            <span>Slots</span>
+          </a>
+          <div class="sidebar-sep"></div>
+          <a class="sidebar-item" href="#" id="openSettings">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 8a4 4 0 110 8 4 4 0 010-8zm9 4a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <span>Configurações</span>
+          </a>
+          <a class="sidebar-item" href="/logout">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M10 17l5-5-5-5v3H3v4h7zM21 3h-8v2h8v14h-8v2h8a2 2 0 002-2V5a2 2 0 00-2-2z"/></svg>
+            <span>Sair</span>
+          </a>
+        </nav>
+      </aside>
+      <div class="overlay" id="sidebarOverlay"></div>
+
+      <main class="main content">
+        <% if (error) { %><div class="alert"><%= error %></div><% } %>
+        <% if (msg) { %><div class="alert" style="background:#153b1a;border-color:#3e7a47;"><%= msg %></div><% } %>
+        <section class="hero">
+          <h1>Bem-vindo, <%= user.first_name %>!</h1>
+          <p>Último login: <%= user.last_login_at ? new Date(user.last_login_at).toLocaleString('pt-BR') : 'primeiro acesso' %></p>
+        </section>
+        <!-- Jogos -->
+        <section class="cards">
+          <div class="card">
+            <h2>Crash</h2>
+            <p>Multiplicador sobe até "crashar". Saia antes para lucrar.</p>
+            <a href="/games/crash" class="primary">Jogar Crash</a>
+          </div>
+          <div class="card">
+            <h2>Campo Minado</h2>
+            <p>Tabuleiro 6x6. Evite bombas e faça cashout quando quiser.</p>
+            <button id="openMinesModal">Jogar Campo Minado</button>
+          </div>
+          <div class="card">
+            <h2>Slots de Números</h2>
+            <p>Três rolos. Sequência igual paga 2x o valor apostado.</p>
+            <button id="openSlotsModal">Jogar Slots</button>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- Modal Configurações -->
+    <div class="modal" id="settingsModal" aria-hidden="true">
+      <div class="modal-backdrop" id="closeSettings"></div>
+      <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+        <header class="modal-header">
+          <h2 id="settingsTitle">Configurações</h2>
+          <button class="icon-btn" id="closeSettingsBtn" aria-label="Fechar">✕</button>
+        </header>
+        <div class="modal-body">
+          <div class="settings-grid">
+            <form class="settings-card" action="/settings/change-password" method="post">
+              <h3>Redefinir senha</h3>
+              <label>Senha atual</label>
+              <input type="password" name="currentPassword" required />
+              <label>Nova senha</label>
+              <input type="password" name="newPassword" required />
+              <small>8+ caracteres, maiúscula, minúscula, número e especial</small>
+              <button type="submit">Atualizar senha</button>
+            </form>
+
+            <form class="settings-card" action="/settings/change-email" method="post">
+              <h3>Redefinir e-mail</h3>
+              <label>Novo e-mail</label>
+              <input type="email" name="email" value="<%= user.email || '' %>" required />
+              <button type="submit">Atualizar e-mail</button>
+              <small>Você receberá um link para verificar o novo e-mail.</small>
+            </form>
+
+            <form class="settings-card danger" action="/settings/delete-account" method="post" id="deleteAccountForm">
+              <h3>Excluir conta</h3>
+              <p>Esta ação é irreversível e resultará na perda de todo saldo.</p>
+              <button type="button" id="openDeleteConfirm">Excluir permanentemente</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Confirmação de Exclusão -->
+    <div class="modal" id="deleteConfirmModal" aria-hidden="true">
+      <div class="modal-backdrop" id="closeDeleteConfirm"></div>
+      <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="deleteTitle">
+        <header class="modal-header">
+          <h2 id="deleteTitle">Confirmar exclusão</h2>
+          <button class="icon-btn" id="closeDeleteConfirmBtn" aria-label="Fechar">✕</button>
+        </header>
+        <div class="modal-body">
+          <div class="settings-card danger">
+            <h3>Atenção</h3>
+            <p>Tem certeza que deseja excluir permanentemente sua conta? Esta ação é irreversível e todo o dinheiro/saldo depositado na conta será perdido de forma definitiva.</p>
+            <div style="display:flex; gap:12px; justify-content:flex-end; margin-top:12px;">
+              <button type="button" id="cancelDeleteBtn">Cancelar</button>
+              <button type="button" id="confirmDeleteBtn" class="danger">Excluir permanentemente</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Depósito -->
+    <div class="modal" id="depositModal" aria-hidden="true">
+      <div class="modal-backdrop" id="closeDepositModal"></div>
+      <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="depositTitle">
+        <header class="modal-header">
+          <h2 id="depositTitle">Depositar via Pix</h2>
+          <button class="icon-btn" id="closeDepositModalBtn" aria-label="Fechar">✕</button>
+        </header>
+        <div class="modal-body">
+          <% if (pendingDeposit) { %>
+            <div class="admin-user-summary" style="display:grid;gap:12px;grid-template-columns: 240px 1fr;align-items:start;">
+              <div>
+                <% if (pendingDeposit.qr_code_base64) { %>
+                  <img alt="QR Pix" style="background:#fff;border-radius:8px;padding:8px;width:240px;height:240px;"
+                       src="<%= pendingDeposit.qr_code_base64 && pendingDeposit.qr_code_base64.startsWith('data:image') ? pendingDeposit.qr_code_base64 : ('data:image/png;base64,' + pendingDeposit.qr_code_base64) %>" />
+                <% } else { %>
+                  <p class="muted">QR não disponível. Tente gerar novamente.</p>
+                <% } %>
+              </div>
+              <div>
+                <div><strong>Valor:</strong> R$ <%= ((pendingDeposit.amount_cents||0)/100).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></div>
+                <div><strong>Identificador:</strong> <%= pendingDeposit.txid %></div>
+                <% if (pendingDeposit.qr_code) { %>
+                  <div style="display:flex;gap:8px;align-items:center;margin-top:8px;">
+                    <input type="text" id="pixCode" readonly value="<%= pendingDeposit.qr_code %>" style="width:100%;" />
+                    <button type="button" id="copyPixCode">Copiar código</button>
+                  </div>
+                <% } %>
+                <p class="muted" style="margin-top:8px;">Escaneie o QR ou use o código copia-e-cola no seu app Nubank. A aprovação é automática ao confirmar o pagamento.</p>
+                <% if (typeof isDev !== 'undefined' && isDev) { %>
+                  <form action="/deposit/<%= pendingDeposit.id %>/simulate-pay" method="post" style="margin-top:12px;">
+                    <button type="submit" style="background:#f39c12;border-color:#e67e22;width:100%;">[DEV] Simular Pagamento</button>
+                  </form>
+                <% } %>
+              </div>
+            </div>
+            <div id="depositPendingFlag" data-has="1" style="display:none;"></div>
+          <% } else { %>
+            <form action="/deposit/create" method="post" class="form" style="display:grid;gap:8px;max-width:420px;">
+              <label>Valor</label>
+              <input type="text" name="amount" placeholder="Ex: 10,00" required />
+              <small>Valor mínimo R$ 1,00</small>
+              <div class="terms-row">
+                <input type="checkbox" id="acceptDeposit" name="acceptDeposit" required />
+                <label for="acceptDeposit">Eu aceito os <a href="#" id="openTerms">Termos de Uso</a> e a <a href="#" id="openPrivacy">Política de Privacidade</a>.</label>
+              </div>
+              <button type="submit">Gerar Pix</button>
+            </form>
+          <% } %>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Modal Campo Minado -->
+    <div class="modal" id="minesModal" aria-hidden="true">
+      <div class="modal-backdrop" id="closeMines"></div>
+      <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="minesTitle">
+        <header class="modal-header">
+          <h2 id="minesTitle">Campo Minado 6x6</h2>
+          <button class="icon-btn" id="closeMinesBtn" aria-label="Fechar">✕</button>
+        </header>
+        <div class="modal-body">
+          <div class="content-card">
+            <form id="minesStartForm" class="form" style="max-width:420px;margin:0 auto;">
+              <label>Valor da aposta</label>
+              <input type="text" name="amount" id="minesAmount" placeholder="Ex: 10,00" required />
+              <label>Bombas</label>
+              <input type="number" name="bombs" id="minesBombs" min="1" max="20" value="5" />
+              <button type="submit">Iniciar</button>
+            </form>
+            <div id="minesGame" style="display:none;">
+              <div id="minesGrid" style="display:grid;grid-template-columns:repeat(6,42px);gap:6px;justify-content:center;margin:12px 0;"></div>
+              <div style="display:flex;gap:8px;justify-content:center;">
+                <button id="minesCashoutBtn">Cashout</button>
+                <button id="minesResetBtn">Novo jogo</button>
+              </div>
+              <p class="muted" id="minesInfo">Abra casas seguras para aumentar o multiplicador.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Slots -->
+    <div class="modal" id="slotsModal" aria-hidden="true">
+      <div class="modal-backdrop" id="closeSlots"></div>
+      <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="slotsTitle">
+        <header class="modal-header">
+          <h2 id="slotsTitle">Slots de Números</h2>
+          <button class="icon-btn" id="closeSlotsBtn" aria-label="Fechar">✕</button>
+        </header>
+        <div class="modal-body">
+          <div class="content-card" style="text-align:center;">
+            <form id="slotsForm" class="form" style="max-width:420px;margin:0 auto;">
+              <label>Valor da aposta</label>
+              <input type="text" name="amount" id="slotsAmount" placeholder="Ex: 10,00" required />
+              <button type="submit">Girar</button>
+            </form>
+            <div style="display:flex;gap:16px;justify-content:center;margin-top:12px;">
+              <div class="content-card" id="slot1" style="width:64px;height:64px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;">-</div>
+              <div class="content-card" id="slot2" style="width:64px;height:64px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;">-</div>
+              <div class="content-card" id="slot3" style="width:64px;height:64px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;">-</div>
+            </div>
+            <p class="muted" id="slotsResult"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Termos de Uso -->
+    <div class="modal" id="termsModal" aria-hidden="true">
+      <div class="modal-backdrop" id="closeTerms"></div>
+      <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="termsTitle">
+        <header class="modal-header">
+          <h2 id="termsTitle">Termos de Uso</h2>
+          <button class="icon-btn" id="closeTermsBtn" aria-label="Fechar">✕</button>
+        </header>
+        <div class="modal-body">
+          <div class="content-card">
+            <p>Conteúdo dos Termos de Uso. Substituir por versão oficial digitalizada.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Política de Privacidade -->
+    <div class="modal" id="privacyModal" aria-hidden="true">
+      <div class="modal-backdrop" id="closePrivacy"></div>
+      <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="privacyTitle">
+        <header class="modal-header">
+          <h2 id="privacyTitle">Política de Privacidade</h2>
+          <button class="icon-btn" id="closePrivacyBtn" aria-label="Fechar">✕</button>
+        </header>
+        <div class="modal-body">
+          <div class="content-card">
+            <p>Conteúdo da Política de Privacidade. Substituir por versão oficial digitalizada.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+  </html>

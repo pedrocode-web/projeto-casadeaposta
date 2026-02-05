@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= brandName %> — Administração</title>
+    <link rel="stylesheet" href="/style.css" />
+    <script defer src="/app.js"></script>
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="nav-left"><span class="brand"><%= brandName %></span></div>
+      <div class="nav-right">
+        <div class="user">
+          <a href="/inicio" class="user-toggle">Voltar ao Início</a>
+        </div>
+      </div>
+    </nav>
+    <main class="main">
+      <% if (error) { %><div class="alert"><%= error %></div><% } %>
+      <% if (msg) { %><div class="alert" style="background:#153b1a;border-color:#3e7a47;"><%= msg %></div><% } %>
+
+      <section class="cards">
+        <div class="card">
+          <h2>Criar novo usuário</h2>
+          <form action="/admin/create-user" method="post" class="form" style="display:grid;gap:8px;">
+            <label>E-mail</label>
+            <input type="email" name="email" />
+            <label>Nome</label>
+            <input type="text" name="firstName" required />
+            <label>Sobrenome</label>
+            <input type="text" name="lastName" required />
+            <label>CPF</label>
+            <input type="text" name="cpf" placeholder="000.000.000-00" required />
+            <label>Data de Nascimento</label>
+            <input type="date" name="dob" required />
+            <label>Senha</label>
+            <input type="password" name="password" required />
+            <div class="terms-row">
+              <input type="checkbox" id="isAdmin" name="isAdmin" />
+              <label for="isAdmin">Conceder acesso de administrador</label>
+            </div>
+            <button type="submit">Criar usuário</button>
+          </form>
+        </div>
+
+        <div class="card" style="grid-column: span 2;">
+          <h2>Usuários</h2>
+          <div class="admin-picker">
+            <form method="get" action="/admin" class="admin-picker-form" id="adminPickerForm">
+              <label for="userId">Escolha o usuário</label>
+              <select id="userId" name="userId">
+                <option value="">— selecione —</option>
+                <% users.forEach(function(u){ %>
+                  <option value="<%= u.id %>" <%= (selectedUserId && String(selectedUserId) === String(u.id)) ? 'selected' : '' %>><%= u.first_name %> <%= u.last_name %> — <%= u.cpf %></option>
+                <% }) %>
+              </select>
+              <% if (selectedUser) { %>
+              <div class="admin-user-summary">
+                <div><strong>E-mail:</strong> <%= selectedUser.email || '-' %></div>
+                <div><strong>Saldo:</strong> R$ <%= ((selectedUser.balance_cents||0)/100).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></div>
+                <div><strong>Admin:</strong> <%= selectedUser.is_admin ? 'Sim' : 'Não' %></div>
+              </div>
+              <% } %>
+            </form>
+          </div>
+
+          <% if (selectedUser) { %>
+          <div class="admin-actions">
+            <div class="action-group">
+              <div class="action-group-title">Dados</div>
+              <form action="/admin/update-user" method="post" class="admin-action-form">
+                <input type="hidden" name="userId" value="<%= selectedUser.id %>" />
+                <input type="text" name="firstName" placeholder="Nome" value="<%= selectedUser.first_name %>" />
+                <input type="text" name="lastName" placeholder="Sobrenome" value="<%= selectedUser.last_name %>" />
+                <input type="email" name="email" placeholder="E-mail" value="<%= selectedUser.email || '' %>" />
+                <input type="password" name="password" placeholder="Nova senha (opcional)" />
+                <button type="submit">Salvar</button>
+              </form>
+            </div>
+            <div class="action-group">
+              <div class="action-group-title">Saldo</div>
+              <form action="/admin/adjust-balance" method="post" class="admin-action-form">
+                <input type="hidden" name="userId" value="<%= selectedUser.id %>" />
+                <input type="text" name="amount" placeholder="Valor (ex: 100,00)" />
+                <button type="submit" name="op" value="add">Adicionar</button>
+                <button type="submit" name="op" value="remove" class="danger">Remover</button>
+              </form>
+            </div>
+            <div class="action-group">
+              <div class="action-group-title">Conta</div>
+              <form action="/admin/delete-user" method="post" class="admin-action-form">
+                <input type="hidden" name="userId" value="<%= selectedUser.id %>" />
+                <button type="submit" class="danger">Excluir</button>
+              </form>
+            </div>
+            <div class="action-group">
+              <div class="action-group-title">Admin</div>
+              <form action="/admin/<%= selectedUser.is_admin ? 'revoke-admin' : 'grant-admin' %>" method="post" class="admin-action-form">
+                <input type="hidden" name="cpf" value="<%= selectedUser.cpf %>" />
+                <button type="submit"><%= selectedUser.is_admin ? 'Revogar admin' : 'Conceder admin' %></button>
+              </form>
+            </div>
+          </div>
+          <% } else { %>
+            <p class="muted" style="margin-top:12px;">Selecione um usuário para ver as ações.</p>
+          <% } %>
+        </div>
+
+        <% if (typeof pendingDeposits !== 'undefined' && pendingDeposits && pendingDeposits.length > 0) { %>
+        <div class="card" style="grid-column: span 2;">
+          <h2>Depósitos pendentes</h2>
+          <div class="admin-actions">
+            <% pendingDeposits.forEach(function(d){ %>
+              <div class="action-group">
+                <div class="action-group-title">Depósito #<%= d.id %> — <%= d.first_name %> <%= d.last_name %> — <%= d.cpf %></div>
+                <div class="admin-user-summary">
+                  <div><strong>Valor:</strong> R$ <%= ((d.amount_cents||0)/100).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></div>
+                  <div><strong>Identificador:</strong> <%= d.txid %></div>
+                  <div><strong>Criado em:</strong> <%= new Date(d.created_at).toLocaleString('pt-BR') %></div>
+                </div>
+                <form action="/admin/deposits/<%= d.id %>/mark-paid" method="post" class="admin-action-form">
+                  <button type="submit">Marcar como pago</button>
+                </form>
+              </div>
+            <% }) %>
+          </div>
+        </div>
+        <% } %>
+      </section>
+    </main>
+  </body>
+  </html>

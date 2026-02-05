@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= brandName %> — Redefinir senha</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1><%= brandName %> — Redefinir senha</h1>
+      <% if (error) { %><div class="alert"><%= error %></div><% } %>
+      <form action="/reset-password" method="post" class="form">
+        <input type="hidden" name="token" value="<%= token %>" />
+        <label>Nova senha</label>
+        <input type="password" name="password" required />
+        <small>8+ caracteres, 1 maiúscula, 1 minúscula, 1 número, 1 especial</small>
+        <button type="submit">Redefinir</button>
+      </form>
+      <p><a href="/login">Voltar ao login</a></p>
+    </div>
+  </body>
+  </html>
