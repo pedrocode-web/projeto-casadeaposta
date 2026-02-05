@@ -8,9 +8,7 @@ Este é um projeto de demonstração de uma plataforma de apostas simples, desen
 
 - **Autenticação**: Login, Registro, Recuperação de Senha, Verificação de E-mail.
 - **Jogos**:
-  - Crash (Multiplicador progressivo)
-  - Mines (Campo minado)
-  - Slots (Caça-níqueis simples)
+  - Crash (Multiplicador progressivo) -- (APENAS UMA BASE, O FOCO DO PROJETO É A FUNCIONALIDADE DO SISTEMA DE PAGAMENTO/DEPÓSITO E ETC.. OS JOGOS NÃO FORAM DESENVOLVIDOS)
 - **Carteira**:
   - Depósitos via Pix (integração simulada/QR Code estático ou dinâmica com provedor)
   - Saldo em tempo real
